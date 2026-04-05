@@ -57,7 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 gender: isMale ? '男' : '女',
                 age: Math.floor(20 + Math.random() * 41), // 20歳 - 60歳でランダム
                 job_category: jobs[Math.floor(Math.random() * jobs.length)],
-                location: locations[Math.floor(Math.random() * locations.length)]
+                location: locations[Math.floor(Math.random() * locations.length)],
+                // 今回追加：過去のイベント参加回数をランダムに付与（0回〜7回）
+                past_event_count: Math.floor(Math.random() * 8)
             });
         }
         return users;
@@ -66,7 +68,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初回ロード時に500名のリストを生成
     const allDummyUsers = generateDummyUsers(500);
 
-    // ユーザー一覧タブに500名を表示
+    // イベント管理用の処理（次回のイベント参加者リスト）
+    function setupEventManagement(users) {
+        const eventSelect = document.getElementById('eventSelect');
+        const eventTableBody = document.getElementById('eventTableBody');
+        const eventStats = document.getElementById('eventStats');
+
+        // イベントタブの描画用関数
+        function renderEvent(isPast) {
+            // ダミーとしてランダムな参加者（35〜55名）を抽出
+            const shuffled = [...users].sort(() => 0.5 - Math.random());
+            const participantCount = Math.floor(35 + Math.random() * 20);
+            const eventParticipants = shuffled.slice(0, participantCount);
+
+            eventTableBody.innerHTML = '';
+            let firstTimers = 0;
+
+            // 過去参加回数でソート (初参加を上に)
+            eventParticipants.sort((a,b) => a.past_event_count - b.past_event_count);
+
+            eventParticipants.forEach(u => {
+                if (u.past_event_count === 0) firstTimers++;
+
+                const statusBadge = u.past_event_count === 0 
+                    ? '<span class="badge-new">✨ 初参加</span>' 
+                    : `<span class="badge-regular">既面 (常連)</span>`;
+                    
+                const timesStr = u.past_event_count === 0 ? '0回' : `${u.past_event_count}回`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${u.nickname}</strong><br><span style="font-size:0.7rem; color:var(--text-sub);">${u.line_id}</span></td>
+                    <td>${u.gender} <span style="font-size:0.75rem;">${u.age}歳</span></td>
+                    <td><span class="badge" style="padding:2px 6px; font-size:0.7rem;">${u.job_category}</span><br><span style="font-size:0.75rem;">${u.location}</span></td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--accent-gold);">${timesStr}</td>
+                `;
+                eventTableBody.appendChild(tr);
+            });
+            eventStats.innerHTML = `参加人数: <strong>${eventParticipants.length}名</strong> (うち初参加: <strong style="color:#fca5a5;">${firstTimers}名</strong>)`;
+        }
+
+        // 初期描画
+        renderEvent(false);
+
+        // セレクトボックス変更時にもう一度ランダム抽出して擬似的に切り替え
+        if (eventSelect) {
+            eventSelect.addEventListener('change', () => {
+                const isPast = eventSelect.value === 'e2';
+                renderEvent(isPast);
+            });
+        }
+    }
+    setupEventManagement(allDummyUsers);
+
+    // ユーザー一覧タブに500名を表示する処理
     function renderUserTable(users) {
         userTableBody.innerHTML = '';
         users.forEach(u => {
@@ -83,10 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         totalUsersStat.textContent = `全体: ${users.length}名`;
     }
-    // 初期描画
     renderUserTable(allDummyUsers);
 
-    // スライダーの連動と表示更新
+    // ----------------------------------------------------
+    // 以下、ステップ1＆2（配信設定・プレビュー・抽出関連）の処理
+    // ----------------------------------------------------
+
     minAgeInput.addEventListener('input', (e) => {
         if (parseInt(e.target.value) > parseInt(maxAgeInput.value)) {
             maxAgeInput.value = e.target.value;
@@ -107,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.disabled = e.target.value.trim().length === 0 || filteredUsers.length === 0;
     });
 
-    // フィルタリング処理（500名のダミーデータから指定条件で抽出）
+    // フィルタリング処理
     filterBtn.addEventListener('click', () => {
         filterBtn.textContent = '抽出中...';
         filterBtn.disabled = true;
@@ -135,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             generateBtn.disabled = eventBody.value.trim().length === 0 || filteredUsers.length === 0;
             
-            // UXのヒントを隠す
+            // UXのヒントを隠して次ステップを表示する
             const demoNote2 = document.getElementById('demo-note-2');
             if (demoNote2 && filteredUsers.length > 0) {
                 demoNote2.style.display = 'block';
@@ -151,10 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const bodyText = eventBody.value;
         const messages = [];
 
-        // API通信の代わりにsetTimeoutでAIの思考時間を演出
         setTimeout(() => {
             filteredUsers.forEach(u => {
-                // ペルソナに合わせた挨拶のバリエーションをランダムに割り当て
                 const greetings = [
                     `${u.nickname}様、春の暖かさが心地よい季節となりましたね。お変わりありませんか？`,
                     `お世話になっております、${u.nickname}様。最近は${u.location}界隈に行かれましたか？`,
@@ -165,20 +221,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 messages.push({
                     text: `${g}\n\n${bodyText}`,
-                    ...u // ユーザー情報もプレビュー表示用に付加
+                    ...u
                 });
             });
 
-            // プレビューの表示更新
             previewList.innerHTML = '';
             
-            // 高負荷を防ぐため画面には最大20件まで表示
             const displayLimit = Math.min(messages.length, 20);
             for (let i = 0; i < displayLimit; i++) {
                 const msg = messages[i];
                 const div = document.createElement('div');
                 div.className = 'preview-card';
-                // 属性情報と生成テキストを整形して表示
                 div.innerHTML = `
                     <div style="font-size:0.8rem; color:var(--accent-gold); margin-bottom:8px;">
                         [${msg.gender} / ${msg.age}歳 / ${msg.job_category} / ${msg.location}]
@@ -200,8 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             targetCount.textContent = `対象: ${messages.length}名`;
             previewSection.style.display = 'block';
-
-            // プレビュー部分へスクロール
             previewSection.scrollIntoView({ behavior: 'smooth' });
 
             generateBtn.textContent = 'AI個別メッセージ再生成';

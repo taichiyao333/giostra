@@ -16,6 +16,7 @@
             
             <div class="tabs">
                 <button class="tab-btn active" data-target="delivery-tab">配信設定</button>
+                <button class="tab-btn" data-target="events-tab">イベント管理</button>
                 <button class="tab-btn" data-target="users-tab">ユーザー一覧</button>
             </div>
         </header>
@@ -93,13 +94,52 @@
                 </section>
             </div>
 
-            <!-- 【タブ2】ユーザー管理 -->
+            <!-- 【タブ2】イベント管理 -->
+            <div id="events-tab" class="tab-content">
+                <section class="glass-panel">
+                    <h2>イベント参加者一覧</h2>
+                    <div class="demo-note">
+                        <strong>💡 デモの使い方 (イベント管理)</strong><br>
+                        当日のアテンド用画面です。参加予定者リストから、「この人は過去何回来たことがあるか（初対面か、リピーターか）」が一目で分かります。これによりホスピタリティの高い声かけが可能になります。
+                    </div>
+                    
+                    <div class="event-selector" style="margin-bottom: 16px;">
+                        <select id="eventSelect" class="form-select">
+                            <option value="e1" selected>【次回】4/15 春のシークレットワイン会</option>
+                            <option value="e2">【過去】3/20 エグゼクティブ交流ラウンジ</option>
+                        </select>
+                    </div>
+
+                    <div class="user-stats-header">
+                        <span class="user-stats-total" id="eventStats">参加予定: 0名 (初参加: 0名)</span>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>名前</th>
+                                    <th>性別/歳</th>
+                                    <th>属性</th>
+                                    <th>ステータス</th>
+                                    <th>来場回数</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventTableBody">
+                                <!-- JSで注入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 【タブ3】ユーザー一覧 -->
             <div id="users-tab" class="tab-content">
                 <section class="glass-panel">
                     <h2>顧客データベース</h2>
                     <div class="demo-note">
-                        <strong>💡 デモの使い方 (モニタリング)</strong><br>
-                        AI（裏側）が自動生成した全500名のリストです。実際の運用では、LINEのチャット会話からAIが自然にこれらを抽出し、DBに蓄積していく様子をここでモニターします。
+                        <strong>💡 デモの使い方 (全体モニタリング)</strong><br>
+                        AI（裏側）が自動生成した全500名のリストです。実際の運用では、LINEのチャット会話からAIが自然にこれらを抽出し、DBに自動構築していく様子をここでモニターします。
                     </div>
                     
                     <div class="user-stats-header">
