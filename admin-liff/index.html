@@ -104,6 +104,7 @@
                     </div>
                     
                     <div class="event-selector" style="margin-bottom: 16px;">
+                        <label>対象イベント</label>
                         <select id="eventSelect" class="form-select">
                             <option value="e1" selected>【次回】4/15 春のシークレットワイン会</option>
                             <option value="e2">【過去】3/20 エグゼクティブ交流ラウンジ</option>
@@ -114,7 +115,7 @@
                         <span class="user-stats-total" id="eventStats">参加予定: 0名 (初参加: 0名)</span>
                     </div>
                     
-                    <div class="table-container">
+                    <div class="table-container" style="max-height: 350px;">
                         <table class="user-table">
                             <thead>
                                 <tr>
@@ -130,6 +131,25 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- 遭遇履歴チェック機能 -->
+                    <div class="mutual-check-section" style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--panel-border);">
+                        <h3 style="font-size:1rem; margin-bottom:12px; color:var(--text-main);">🤝 参加者同士の遭遇履歴チェック</h3>
+                        <div class="demo-note" style="margin-top:0;">
+                            <strong>💡 デモの使い方 (NG・遭遇チェック)</strong><br>
+                            このイベントの参加者から1名を選択してください。その人が「他の参加者と過去に同じイベントで何回会っているか」を判定します。席の配置やマッチング案内に役立ちます。
+                        </div>
+                        <div class="config-group">
+                            <select id="mutualUserSelect" class="form-select">
+                                <option value="">参加者を選択してください...</option>
+                                <!-- 動的に追加 -->
+                            </select>
+                        </div>
+                        <div id="mutualResult" style="display:none; background:rgba(0,0,0,0.3); padding:16px; border-radius:8px;">
+                            <!-- JSで結果を注入 -->
+                        </div>
+                    </div>
+
                 </section>
             </div>
 
