@@ -9,68 +9,123 @@
 </head>
 <body>
     <div class="liff-container">
-        <!-- Header -->
+        <!-- Header & Tabs -->
         <header class="glass-panel">
             <h1>GIOSTRA</h1>
-            <p>コンシェルジュ配信設定</p>
+            <p>コンシェルジュ配信管理デモ</p>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-target="delivery-tab">配信設定</button>
+                <button class="tab-btn" data-target="users-tab">ユーザー一覧</button>
+            </div>
         </header>
 
         <!-- Main Content -->
         <main>
-            <!-- 配信設定 -->
-            <section class="config-section glass-panel">
-                <h2>セグメント抽出</h2>
+            <!-- 【タブ1】配信設定 -->
+            <div id="delivery-tab" class="tab-content active">
                 
-                <div class="config-group">
-                    <label>年齢制限</label>
-                    <div class="slider-wrapper">
-                        <input type="range" id="minAge" min="20" max="60" value="25">
-                        <span class="slider-val" id="minAgeVal">25歳</span>
-                        <span>〜</span>
-                        <input type="range" id="maxAge" min="20" max="60" value="40">
-                        <span class="slider-val" id="maxAgeVal">40歳</span>
+                <div class="demo-note">
+                    <strong>💡 デモの使い方 (ステップ1)</strong><br>
+                    まずは下の「年齢制限」や「職業タグ」を選択し、【ターゲットを抽出する】ボタンを押してください。裏側で生成された500名の中から条件に合う顧客が瞬時に絞り込まれます。
+                </div>
+
+                <!-- 配信設定 -->
+                <section class="config-section glass-panel">
+                    <h2>セグメント抽出</h2>
+                    
+                    <div class="config-group">
+                        <label>年齢制限</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="minAge" min="20" max="60" value="25">
+                            <span class="slider-val" id="minAgeVal">25歳</span>
+                            <span>〜</span>
+                            <input type="range" id="maxAge" min="20" max="60" value="40">
+                            <span class="slider-val" id="maxAgeVal">40歳</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="config-group">
-                    <label>職業タグ</label>
-                    <div class="tags-container">
-                        <label class="tag-checkbox"><input type="checkbox" value="経営者"> <span>経営者</span></label>
-                        <label class="tag-checkbox"><input type="checkbox" value="医療"> <span>医療</span></label>
-                        <label class="tag-checkbox"><input type="checkbox" value="モデル"> <span>モデル</span></label>
-                        <label class="tag-checkbox"><input type="checkbox" value="CA"> <span>CA</span></label>
+                    <div class="config-group">
+                        <label>職業タグ (複数選択可)</label>
+                        <div class="tags-container">
+                            <label class="tag-checkbox"><input type="checkbox" value="経営者"> <span>経営者</span></label>
+                            <label class="tag-checkbox"><input type="checkbox" value="医療"> <span>医療</span></label>
+                            <label class="tag-checkbox"><input type="checkbox" value="モデル"> <span>モデル</span></label>
+                            <label class="tag-checkbox"><input type="checkbox" value="CA"> <span>CA</span></label>
+                            <label class="tag-checkbox"><input type="checkbox" value="会社員"> <span>会社員</span></label>
+                            <label class="tag-checkbox"><input type="checkbox" value="弁護士"> <span>弁護士</span></label>
+                        </div>
                     </div>
+
+                    <div class="config-group toggle-group">
+                        <label>過去のNGペアを除外</label>
+                        <label class="switch">
+                            <input type="checkbox" id="ngToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <button id="filterBtn" class="primary-btn">ターゲットを抽出する</button>
+                </section>
+
+                <div class="demo-note" id="demo-note-2">
+                    <strong>💡 デモの使い方 (ステップ2)</strong><br>
+                    ターゲット抽出後、例えば「今週末のシークレットイベントにご招待します。」などの案内テキストを入力し、【AI個別メッセージ生成】を押すと、各ユーザーの属性に合わせた「個別挨拶＋案内」が自動生成されます。
                 </div>
 
-                <div class="config-group toggle-group">
-                    <label>過去のNGペアを除外</label>
-                    <label class="switch">
-                        <input type="checkbox" id="ngToggle" checked>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
+                <!-- イベント本文入力 -->
+                <section class="config-section glass-panel">
+                    <h2>イベント共通本文</h2>
+                    <textarea id="eventBody" rows="4" placeholder="例: 週末のシークレットパーティーのご案内..."></textarea>
+                    <button id="generateBtn" class="primary-btn generate-btn" disabled>AI個別メッセージ生成</button>
+                </section>
 
-                <button id="filterBtn" class="primary-btn">ターゲットを抽出する</button>
-            </section>
+                <!-- プレビュー -->
+                <section class="preview-section glass-panel" id="previewSection" style="display: none;">
+                    <div class="preview-header">
+                        <h2>配信プレビュー</h2>
+                        <span class="badge" id="targetCount">対象: 0名</span>
+                    </div>
+                    <div id="previewList" class="preview-list">
+                        <!-- AI generated messages will be appended here -->
+                    </div>
+                    <button class="primary-btn send-btn">LINEで一斉送信する</button>
+                </section>
+            </div>
 
-            <!-- イベント本文入力 -->
-            <section class="config-section glass-panel">
-                <h2>イベント共通本文</h2>
-                <textarea id="eventBody" rows="4" placeholder="例: 週末のシークレットパーティーのご案内..."></textarea>
-                <button id="generateBtn" class="primary-btn generate-btn" disabled>AI個別メッセージ生成</button>
-            </section>
+            <!-- 【タブ2】ユーザー管理 -->
+            <div id="users-tab" class="tab-content">
+                <section class="glass-panel">
+                    <h2>顧客データベース</h2>
+                    <div class="demo-note">
+                        <strong>💡 デモの使い方 (モニタリング)</strong><br>
+                        AI（裏側）が自動生成した全500名のリストです。実際の運用では、LINEのチャット会話からAIが自然にこれらを抽出し、DBに蓄積していく様子をここでモニターします。
+                    </div>
+                    
+                    <div class="user-stats-header">
+                        <span class="user-stats-total" id="totalUsersStat">全体: 500名</span>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>LINE ID</th>
+                                    <th>名前</th>
+                                    <th>性別</th>
+                                    <th>年齢</th>
+                                    <th>職業</th>
+                                    <th>居住地</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <!-- JSで500名分を注入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
 
-            <!-- プレビュー -->
-            <section class="preview-section glass-panel" id="previewSection" style="display: none;">
-                <div class="preview-header">
-                    <h2>配信プレビュー</h2>
-                    <span class="badge" id="targetCount">対象: 0名</span>
-                </div>
-                <div id="previewList" class="preview-list">
-                    <!-- AI generated messages will be appended here -->
-                </div>
-                <button class="primary-btn send-btn">LINEで一斉送信する</button>
-            </section>
         </main>
     </div>
 

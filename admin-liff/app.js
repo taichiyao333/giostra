@@ -1,4 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // タブ切り替え処理
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // タブボタンのアクティブ状態を切り替え
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // 表示コンテンツを切り替え
+            const targetId = btn.getAttribute('data-target');
+            tabContents.forEach(content => {
+                if (content.id === targetId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        });
+    });
+
     const minAgeInput = document.getElementById('minAge');
     const maxAgeInput = document.getElementById('maxAge');
     const minAgeVal = document.getElementById('minAgeVal');
@@ -13,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetCount = document.getElementById('targetCount');
     const sendBtn = document.querySelector('.send-btn');
     
+    const userTableBody = document.getElementById('userTableBody');
+    const totalUsersStat = document.getElementById('totalUsersStat');
+
     let filteredUsers = [];
 
     // ダミーユーザー500名の自動生成
@@ -40,6 +65,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初回ロード時に500名のリストを生成
     const allDummyUsers = generateDummyUsers(500);
+
+    // ユーザー一覧タブに500名を表示
+    function renderUserTable(users) {
+        userTableBody.innerHTML = '';
+        users.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color:var(--text-sub);">${u.line_id}</td>
+                <td><strong>${u.nickname}</strong></td>
+                <td>${u.gender}</td>
+                <td>${u.age}歳</td>
+                <td><span class="badge" style="padding:2px 8px; font-size:0.75rem;">${u.job_category}</span></td>
+                <td>${u.location}</td>
+            `;
+            userTableBody.appendChild(tr);
+        });
+        totalUsersStat.textContent = `全体: ${users.length}名`;
+    }
+    // 初期描画
+    renderUserTable(allDummyUsers);
 
     // スライダーの連動と表示更新
     minAgeInput.addEventListener('input', (e) => {
@@ -89,6 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 1000);
 
             generateBtn.disabled = eventBody.value.trim().length === 0 || filteredUsers.length === 0;
+            
+            // UXのヒントを隠す
+            const demoNote2 = document.getElementById('demo-note-2');
+            if (demoNote2 && filteredUsers.length > 0) {
+                demoNote2.style.display = 'block';
+            }
         }, 600); 
     });
 
@@ -171,4 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 1000);
         }
     });
+
+    // 初期状態：イベント本文の入力がないのでAI生成ボタンは無効化、ステップ2説明を非表示
+    const demoNote2 = document.getElementById('demo-note-2');
+    if (demoNote2) demoNote2.style.display = 'none';
 });
