@@ -49,6 +49,8 @@
                     <div class="config-group">
                         <label>職業タグ (複数選択可)</label>
                         <div class="tags-container">
+                            <!-- 全員タグ：選択されると他のタグを無効化し全員を対象にする -->
+                            <label class="tag-checkbox tag-all"><input type="checkbox" id="tagAll" value="ALL"> <span>⚡ 全員</span></label>
                             <label class="tag-checkbox"><input type="checkbox" value="経営者"> <span>経営者</span></label>
                             <label class="tag-checkbox"><input type="checkbox" value="医療"> <span>医療</span></label>
                             <label class="tag-checkbox"><input type="checkbox" value="モデル"> <span>モデル</span></label>
@@ -74,11 +76,57 @@
                     ターゲット抽出後、例えば「今週末のシークレットイベントにご招待します。」などの案内テキストを入力し、【AI個別メッセージ生成】を押すと、各ユーザーの属性に合わせた「個別挨拶＋案内」が自動生成されます。
                 </div>
 
-                <!-- イベント本文入力 -->
+                <!-- LINE配信メッセージ作成 -->
                 <section class="config-section glass-panel">
-                    <h2>イベント共通本文</h2>
-                    <textarea id="eventBody" rows="4" placeholder="例: 週末のシークレットパーティーのご案内..."></textarea>
-                    <button id="generateBtn" class="primary-btn generate-btn" disabled>AI個別メッセージ生成</button>
+                    <h2>📨 LINEメッセージ作成</h2>
+
+                    <!-- ① メッセージタイトル（カード上部に表示） -->
+                    <div class="config-group">
+                        <label class="input-label">メッセージタイトル <span class="required">*必須</span></label>
+                        <input type="text" id="msgTitle" class="form-input" placeholder="例: 【GIOSTRA】4月のシークレットイベントご招待">
+                    </div>
+
+                    <!-- ② ヘッダー画像URL（任意） -->
+                    <div class="config-group">
+                        <label class="input-label">ヘッダー画像URL <span class="optional">任意</span></label>
+                        <input type="url" id="msgImageUrl" class="form-input" placeholder="https://...（LINEが参照できる公開画像URL）">
+                        <p class="input-hint">推奨サイズ: 1040×585px、2MB以内のJPG/PNG</p>
+                    </div>
+
+                    <!-- ③ 共通本文（イベント概要・日時・場所など） -->
+                    <div class="config-group">
+                        <label class="input-label">イベント共通本文 <span class="required">*必須</span></label>
+                        <textarea id="eventBody" rows="5" placeholder="例: 日時: 4月15日(土) 19:00〜22:00&#10;会場: 六本木 シークレットラウンジ&#10;定員: 男女各15名&#10;&#10;詳細はこちらのURLへ..."></textarea>
+                        <p class="input-hint">AIが各ユーザーの属性に合わせた冒頭文を自動付加します</p>
+                    </div>
+
+                    <!-- ④ CTAボタン（行動喚起） -->
+                    <div class="config-group">
+                        <label class="input-label">CTAボタンテキスト <span class="optional">任意</span></label>
+                        <input type="text" id="msgCtaText" class="form-input" placeholder="例: 参加申し込みはこちら">
+                    </div>
+                    <div class="config-group">
+                        <label class="input-label">CTAリンクURL <span class="optional">任意</span></label>
+                        <input type="url" id="msgCtaUrl" class="form-input" placeholder="https://...（フォームや申し込みページ）">
+                    </div>
+
+                    <!-- ⑤ フッター・注意書き -->
+                    <div class="config-group">
+                        <label class="input-label">フッター / 注意書き <span class="optional">任意</span></label>
+                        <textarea id="msgFooter" rows="2" placeholder="例: ご返信は不要です。本メッセージはGIOSTRAメンバー限定でお送りしています。"></textarea>
+                    </div>
+
+                    <!-- ⑥ 配信タイミング -->
+                    <div class="config-group">
+                        <label class="input-label">配信タイミング</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sendTiming" value="now" checked> <span>今すぐ送信</span></label>
+                            <label class="radio-label"><input type="radio" name="sendTiming" value="schedule"> <span>日時指定</span></label>
+                        </div>
+                        <input type="datetime-local" id="scheduleTime" class="form-input" style="display:none; margin-top:8px;">
+                    </div>
+
+                    <button id="generateBtn" class="primary-btn generate-btn" disabled>🤖 AI個別メッセージ生成・プレビュー</button>
                 </section>
 
                 <!-- プレビュー -->

@@ -244,8 +244,36 @@ document.addEventListener('DOMContentLoaded', () => {
         maxAgeVal.textContent = e.target.value + '歳';
     });
 
-    eventBody.addEventListener('input', (e) => {
-        generateBtn.disabled = e.target.value.trim().length === 0 || filteredUsers.length === 0;
+    eventBody.addEventListener('input', () => checkGenerateReady());
+    if (document.getElementById('msgTitle')) {
+        document.getElementById('msgTitle').addEventListener('input', () => checkGenerateReady());
+    }
+
+    function checkGenerateReady() {
+        const hasBody = eventBody && eventBody.value.trim().length > 0;
+        const hasTitle = !document.getElementById('msgTitle') || document.getElementById('msgTitle').value.trim().length > 0;
+        generateBtn.disabled = !hasBody || !hasTitle || filteredUsers.length === 0;
+    }
+
+    // 全員タグのトグル処理：全員をオンにすると他のタグを無効化
+    const tagAllInput = document.getElementById('tagAll');
+    const otherTagInputs = document.querySelectorAll('.tag-checkbox:not(.tag-all) input[type="checkbox"]');
+    if (tagAllInput) {
+        tagAllInput.addEventListener('change', () => {
+            otherTagInputs.forEach(cb => {
+                cb.disabled = tagAllInput.checked;
+                cb.closest('.tag-checkbox').classList.toggle('tag-other-disabled', tagAllInput.checked);
+                if (tagAllInput.checked) cb.checked = false;
+            });
+        });
+    }
+
+    // 配信タイミングのラジオ切り替えによる日時指定入力の表示切り替え
+    const scheduleInput = document.getElementById('scheduleTime');
+    document.querySelectorAll('input[name="sendTiming"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (scheduleInput) scheduleInput.style.display = radio.value === 'schedule' ? 'block' : 'none';
+        });
     });
 
     filterBtn.addEventListener('click', () => {
@@ -254,28 +282,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const maxAge = parseInt(maxAgeInput.value);
         const minAge = parseInt(minAgeInput.value);
-        const jobTags = Array.from(document.querySelectorAll('.tag-checkbox input:checked')).map(el => el.value);
 
+        // 全員タグがオンなら年齢以外のフィルターは無効
+        const isAll = tagAllInput && tagAllInput.checked;
+        const jobTags = isAll ? [] : Array.from(document.querySelectorAll('.tag-checkbox:not(.tag-all) input:checked')).map(el => el.value);
+
+        // API通信の代わりにsetTimeoutで処理時間を擬似的に演出
         setTimeout(() => {
             filteredUsers = allDummyUsers.filter(u => {
                 if (u.age < minAge || u.age > maxAge) return false;
-                if (jobTags.length > 0 && !jobTags.includes(u.job_category)) return false;
+                // 全員またはタグなしの場合は年齢のみで絞り込み
+                if (!isAll && jobTags.length > 0 && !jobTags.includes(u.job_category)) return false;
                 return true;
             });
 
             filterBtn.textContent = `完了: ${filteredUsers.length}名を抽出`;
             
+            // 少し待ってから元のテキストに戻す
             setTimeout(() => {
                 filterBtn.textContent = 'ターゲットを再抽出する';
                 filterBtn.disabled = false;
             }, 1000);
 
-            generateBtn.disabled = eventBody.value.trim().length === 0 || filteredUsers.length === 0;
+            checkGenerateReady();
             
             const demoNote2 = document.getElementById('demo-note-2');
-            if (demoNote2 && filteredUsers.length > 0) {
-                demoNote2.style.display = 'block';
-            }
+            if (demoNote2 && filteredUsers.length > 0) demoNote2.style.display = 'block';
         }, 600); 
     });
 
