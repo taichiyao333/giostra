@@ -205,24 +205,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setupEventManagement(allDummyUsers);
 
-    // ユーザー一覧タブに500名を表示する処理
-    function renderUserTable(users) {
+    // ユーザー一覧タブ：バックエンドのリアルDBを取得、失敗時はダミーデータで表示
+    async function loadUserTable() {
+        try {
+            const res = await fetch('http://localhost:3000/api/users');
+            const data = await res.json();
+
+            if (data.users && data.users.length > 0) {
+                // リアルDBのデータがある場合はそちらを表示
+                renderUserTable(data.users, true);
+            } else {
+                // DB登録者ゼロの場合はダミーデータをフォールバック表示
+                renderUserTable(allDummyUsers, false);
+            }
+        } catch (e) {
+            // バックエンドに繋がらない場合はダミーデータで表示
+            renderUserTable(allDummyUsers, false);
+        }
+    }
+
+    function renderUserTable(users, isLive = false) {
         userTableBody.innerHTML = '';
         users.forEach(u => {
             const tr = document.createElement('tr');
+            const isNew = isLive && u.registered_at && (Date.now() - new Date(u.registered_at).getTime() < 86400000);
             tr.innerHTML = `
-                <td style="color:var(--text-sub);">${u.line_id}</td>
-                <td><strong>${u.nickname}</strong></td>
-                <td>${u.gender}</td>
-                <td>${u.age}歳</td>
-                <td><span class="badge" style="padding:2px 8px; font-size:0.75rem;">${u.job_category}</span></td>
-                <td>${u.location}</td>
+                <td style="color:var(--text-sub); font-size:0.75rem;">${u.line_id}</td>
+                <td>
+                    ${isNew ? '<span class="badge-new" style="font-size:0.65rem; padding:1px 5px; margin-right:4px;">NEW</span>' : ''}
+                    <strong>${u.nickname}</strong>
+                </td>
+                <td>${u.gender || '<span style="color:var(--text-sub)">未取得</span>'}</td>
+                <td>${u.age ? u.age + '歳' : '<span style="color:var(--text-sub)">未取得</span>'}</td>
+                <td>${u.job_category ? '<span class="badge" style="padding:2px 8px; font-size:0.75rem;">' + u.job_category + '</span>' : '<span style="color:var(--text-sub)">未取得</span>'}</td>
+                <td>${u.location || '<span style="color:var(--text-sub)">未取得</span>'}</td>
             `;
             userTableBody.appendChild(tr);
         });
-        totalUsersStat.textContent = `全体: ${users.length}名`;
+        
+        // DBソースの表示（ライブ or デモ）
+        const sourceLabel = isLive
+            ? `<span style="color:#4ade80;">● ライブDB (LINE連携中)</span>`
+            : `<span style="color:var(--text-sub);">○ デモデータ (バックエンド未接続)</span>`;
+        totalUsersStat.innerHTML = `登録数: <strong>${users.length}名</strong> &nbsp; ${sourceLabel}`;
     }
-    renderUserTable(allDummyUsers);
+    // 初回ロード + 30秒ごとに自動リフレッシュ（友達追加があればリアルタイム反映）
+    loadUserTable();
+    setInterval(loadUserTable, 30000);
+
+    // ユーザー一覧タブをクリックした時も最新データを取得
+    document.querySelector('[data-target="users-tab"]').addEventListener('click', loadUserTable);
 
     // ----------------------------------------------------
     // 配信設定・プレビュー・抽出処理
