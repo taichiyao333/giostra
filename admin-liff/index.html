@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GIOSTRA | メンバーシップ・コンシェルジュ管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="liff-container">
+        <!-- Header -->
+        <header class="glass-panel">
+            <h1>GIOSTRA</h1>
+            <p>コンシェルジュ配信設定</p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- 配信設定 -->
+            <section class="config-section glass-panel">
+                <h2>セグメント抽出</h2>
+                
+                <div class="config-group">
+                    <label>年齢制限</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="minAge" min="20" max="60" value="25">
+                        <span class="slider-val" id="minAgeVal">25歳</span>
+                        <span>〜</span>
+                        <input type="range" id="maxAge" min="20" max="60" value="40">
+                        <span class="slider-val" id="maxAgeVal">40歳</span>
+                    </div>
+                </div>
+
+                <div class="config-group">
+                    <label>職業タグ</label>
+                    <div class="tags-container">
+                        <label class="tag-checkbox"><input type="checkbox" value="経営者"> <span>経営者</span></label>
+                        <label class="tag-checkbox"><input type="checkbox" value="医療"> <span>医療</span></label>
+                        <label class="tag-checkbox"><input type="checkbox" value="モデル"> <span>モデル</span></label>
+                        <label class="tag-checkbox"><input type="checkbox" value="CA"> <span>CA</span></label>
+                    </div>
+                </div>
+
+                <div class="config-group toggle-group">
+                    <label>過去のNGペアを除外</label>
+                    <label class="switch">
+                        <input type="checkbox" id="ngToggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <button id="filterBtn" class="primary-btn">ターゲットを抽出する</button>
+            </section>
+
+            <!-- イベント本文入力 -->
+            <section class="config-section glass-panel">
+                <h2>イベント共通本文</h2>
+                <textarea id="eventBody" rows="4" placeholder="例: 週末のシークレットパーティーのご案内..."></textarea>
+                <button id="generateBtn" class="primary-btn generate-btn" disabled>AI個別メッセージ生成</button>
+            </section>
+
+            <!-- プレビュー -->
+            <section class="preview-section glass-panel" id="previewSection" style="display: none;">
+                <div class="preview-header">
+                    <h2>配信プレビュー</h2>
+                    <span class="badge" id="targetCount">対象: 0名</span>
+                </div>
+                <div id="previewList" class="preview-list">
+                    <!-- AI generated messages will be appended here -->
+                </div>
+                <button class="primary-btn send-btn">LINEで一斉送信する</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
